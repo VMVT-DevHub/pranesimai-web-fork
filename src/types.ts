@@ -24,7 +24,7 @@ export interface Question extends CommonFields {
   condition: {
     question: number;
     value: string;
-  };
+  }[];
   hint: string;
   options: Option[];
 }

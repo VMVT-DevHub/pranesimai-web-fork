@@ -13,6 +13,7 @@ export interface OptionsContainerProps {
   disabled?: boolean;
   getOptionLabel: (option: any) => string;
   loading?: boolean;
+  isAddress?: boolean;
   showSelect: boolean;
   observerRef?: any;
   handleClick: (option: any) => any;
@@ -23,6 +24,7 @@ const OptionsContainer = ({
   disabled = false,
   getOptionLabel,
   handleClick,
+  isAddress = false,
   showSelect,
   loading,
   observerRef,
@@ -49,7 +51,7 @@ const OptionsContainer = ({
                 handleClick(option);
               }}
             >
-              {getOptionLabel && getOptionLabel(option)}
+              {isAddress ? option : getOptionLabel && getOptionLabel(option)}
             </Option>
           );
         })}

@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { Navigate, Route, Routes, useNavigate } from 'react-router-dom';
 import FullscreenLoader from './components/other/FullscreenLoader';
 import { routes, slugs } from './utils';
-import api from './utils/api';
+import { api } from './utils/api';
 
 function App() {
   const {

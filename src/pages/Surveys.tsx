@@ -8,7 +8,7 @@ import FullscreenLoader from '../components/other/FullscreenLoader';
 import Default from '../layouts/Default';
 import { Survey } from '../types';
 import { AuthTypes, buttonLabels, descriptions, slugs, titles } from '../utils';
-import api from '../utils/api';
+import { api } from '../utils/api';
 
 const Surveys = () => {
   const [selectedSurvey, setSelectedSurvey] = useState<Survey | undefined>(undefined);
