@@ -55,6 +55,12 @@ export enum Resources {
   FILES_UPLOAD = 'files/upload',
 }
 
+export enum RegisterResources {
+  FIND_GYV = 'ar/search/gyv',
+  FIND_GAT = 'ar/search/gat',
+  FIND_AOB = 'ar/search/aob',
+}
+
 export enum Populations {
   PAGE = 'page',
   QUESTIONS = 'questions',
@@ -63,6 +69,7 @@ export enum Populations {
 class Api {
   private AuthApiAxios: AxiosInstance;
   private readonly proxy: string = '/api';
+  // private readonly registerProxy: string = '/register';
 
   constructor() {
     this.AuthApiAxios = Axios.create();
@@ -178,9 +185,9 @@ class Api {
 
       return data?.map((file) => {
         return {
-          id: file.id,
           name: file.filename,
           size: file.size,
+          url: file?.url,
         };
       });
     } catch (e: any) {
@@ -206,6 +213,44 @@ class Api {
   };
 }
 
-const api = new Api();
+class ApiReg {
+  //temporary
+  private AuthApiAxios: AxiosInstance;
+  private readonly proxy: string = '/register';
 
-export default api;
+  constructor() {
+    this.AuthApiAxios = Axios.create();
+
+    this.AuthApiAxios.interceptors.request.use(
+      (config) => {
+        config.url = this.proxy + config.url;
+
+        return config;
+      },
+      (error) => {
+        Promise.reject(error);
+      },
+    );
+  }
+
+  errorWrapper = async (endpoint: () => Promise<AxiosResponse<any, any>>) => {
+    const res = await endpoint();
+
+    return res.data;
+  };
+
+  get = async ({ resource, id }: GetAll) => {
+    return this.errorWrapper(() => this.AuthApiAxios.get(`/${resource}${id ? `/${id}` : ''}`));
+  };
+
+  getGyv = async (gyv: string): Promise<any> => {
+    return this.get({
+      resource: `${RegisterResources.FIND_GYV}?q=${gyv}&top=10`,
+    });
+  };
+}
+
+const api = new Api();
+const api_reg = new ApiReg();
+
+export { api, api_reg };

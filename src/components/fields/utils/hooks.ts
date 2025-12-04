@@ -57,6 +57,12 @@ export const useSelectData = ({
     onChange(option);
   };
 
+  const handleAddressClick = (option: any) => {
+    setShowSelect(false);
+    setInputValue(option);
+    onChange(option);
+  };
+
   const handleOnChange = (input: string) => {
     if (!options) return;
 
@@ -66,6 +72,7 @@ export const useSelectData = ({
   };
 
   const handleToggleSelect = () => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     !disabled && setShowSelect(!showSelect);
   };
 
@@ -76,6 +83,7 @@ export const useSelectData = ({
     showSelect,
     handleBlur,
     handleClick,
+    handleAddressClick,
     handleOnChange,
     loading,
   };

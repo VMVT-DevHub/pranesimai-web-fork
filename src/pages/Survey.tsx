@@ -19,7 +19,10 @@ import Default from '../layouts/Default';
 import { device } from '../styles';
 import { Option, Question } from '../types';
 import { ButtonColors, buttonLabels, isEmpty, QuestionType, slugs } from '../utils';
-import api from '../utils/api';
+import { api } from '../utils/api';
+import InfoCardButtonsGroup from '../components/buttons/InfoCardButtonsGroup';
+import AddressSelectField from '../components/fields/AddressSelectField';
+import NumericTextField from '../components/fields/NumericTextField';
 
 const Survey = () => {
   const [searchParams] = useSearchParams();
@@ -48,27 +51,40 @@ const Survey = () => {
     setValues(currentResponse?.values);
   }, [currentResponse?.values]);
 
-  const handleIsHiddenField = (conditionQuestions: Question, condition: Question['condition']) => {
-    if (!conditionQuestions) return false;
+  const handleIsHiddenField = (
+    allQuestions: Record<number, Question>,
+    conditions: Question['condition'],
+  ) => {
+    if (!allQuestions || !conditions) return false;
 
-    const conditionQuestionValue = values?.[condition.question];
+    const conditionsArray = Array.isArray(conditions) ? conditions : [conditions];
 
-    if (conditionQuestions.type === QuestionType.MULTISELECT) {
-      if (!conditionQuestionValue?.includes(condition.value)) return true;
-    } else {
-      if (conditionQuestionValue !== condition.value) return true;
-    }
+    if (conditionsArray.length === 0) return false;
+
+    const allConditionsMet = conditionsArray.every((condition) => {
+      const conditionQuestion = allQuestions[condition.question];
+      if (!conditionQuestion) return false;
+
+      const conditionQuestionValue = values?.[condition.question];
+
+      if (conditionQuestion.type === QuestionType.MULTISELECT) {
+        return conditionQuestionValue?.includes(condition.value);
+      } else {
+        return conditionQuestionValue === condition.value;
+      }
+    });
+
+    return !allConditionsMet;
   };
 
   const renderField = (
-    conditionQuestions: Question,
+    conditionQuestions: Record<number, Question>,
     currentQuestion: Question,
     onChange,
     values,
   ) => {
     const { condition, title, hint, options, required, spField } = currentQuestion;
     const fieldValue = values?.[currentQuestion.id];
-
     const maxSelectedValues = (spField && Number(spField.split('')[spField.length - 1])) || 5;
 
     if (handleIsHiddenField(conditionQuestions, condition)) {
@@ -84,6 +100,7 @@ const Survey = () => {
     const geSelectProps = {
       ...getCommonProps,
       getOptionLabel: (option: Option) => option.title,
+      description: (option: Option) => option.description,
       options,
     };
 
@@ -113,6 +130,16 @@ const Survey = () => {
         );
       case QuestionType.INPUT:
         return <TextField {...getCommonProps} />;
+      case QuestionType.NUMBER:
+        return <NumericTextField {...getCommonProps} />;
+      case QuestionType.INFOCARD:
+        return (
+          <InfoCardButtonsGroup
+            {...geSelectProps}
+            onChange={(value) => onChange(value.id)}
+            isSelected={(options) => options.id === fieldValue}
+          />
+        );
       case QuestionType.EMAIL:
         return <TextField {...getCommonProps} type="email" />;
       case QuestionType.TEXT:
@@ -150,6 +177,8 @@ const Survey = () => {
             onDelete={(files: any) => onChange(files)}
           />
         );
+      case QuestionType.ADDRESS:
+        return <AddressSelectField {...geSelectProps} />;
 
       default:
         return null;
@@ -160,6 +189,7 @@ const Survey = () => {
     mutationFn: (params: { [key: string]: any }) => api.submitResponse(pageId, { values: params }),
     onSuccess: (data) => {
       const nav = data?.nextResponse ? { search: `pageId=${data.nextResponse}` } : slugs.end;
+
       return navigate(nav);
     },
   });
@@ -168,9 +198,10 @@ const Survey = () => {
     submitResponseMutation.mutateAsync(values);
   };
 
-  if (isLoading || !currentResponse) return <FullscreenLoader />;
+  if (isLoading || !currentResponse?.page) return <FullscreenLoader />;
 
-  const { title, description } = currentResponse?.page || {};
+  // eslint-disable-next-line no-unsafe-optional-chaining
+  const { title, description } = currentResponse?.page;
   const questions = currentResponse?.questions || [];
   const showBackButton = !!currentResponse?.previousResponse;
 
@@ -183,7 +214,7 @@ const Survey = () => {
 
     if (!isEmpty(values[id])) return false;
 
-    if (handleIsHiddenField(mappedQuestionsByIds[condition?.question], condition)) return false;
+    if (handleIsHiddenField(mappedQuestionsByIds, condition)) return false;
 
     if (required) return true;
   };
@@ -201,7 +232,7 @@ const Survey = () => {
       <Container>
         {questions?.map((question) =>
           renderField(
-            mappedQuestionsByIds[question?.condition?.question],
+            mappedQuestionsByIds,
             question,
             (value) => setValues({ ...values, [question.id]: value }),
             values,
