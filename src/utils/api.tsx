@@ -47,18 +47,19 @@ interface Create {
   id?: string;
 }
 
+export interface AddressSearchItem {
+  id: number;
+  pavad: string;
+  vietove: string;
+  tipas: string;
+}
+
 export enum Resources {
   SURVEYS = 'surveys',
   START_SURVEY = 'sessions/start',
   RESPONSES = 'responses',
   CURRENT_SESSION = 'sessions/current',
   FILES_UPLOAD = 'files/upload',
-}
-
-export enum RegisterResources {
-  FIND_GYV = 'ar/search/gyv',
-  FIND_GAT = 'ar/search/gat',
-  FIND_AOB = 'ar/search/aob',
 }
 
 export enum Populations {
@@ -69,7 +70,6 @@ export enum Populations {
 class Api {
   private AuthApiAxios: AxiosInstance;
   private readonly proxy: string = '/api';
-  // private readonly registerProxy: string = '/register';
 
   constructor() {
     this.AuthApiAxios = Axios.create();
@@ -185,9 +185,9 @@ class Api {
 
       return data?.map((file) => {
         return {
+          id: file.id,
           name: file.filename,
           size: file.size,
-          url: file?.url,
         };
       });
     } catch (e: any) {
@@ -211,46 +211,28 @@ class Api {
       params,
     });
   };
-}
 
-class ApiReg {
-  //temporary
-  private AuthApiAxios: AxiosInstance;
-  private readonly proxy: string = '/register';
+  // ---------------------------------------------------------------------------
+  // ADDRESS SEARCH ENDPOINTS (via /addresses service)
+  // ---------------------------------------------------------------------------
 
-  constructor() {
-    this.AuthApiAxios = Axios.create();
-
-    this.AuthApiAxios.interceptors.request.use(
-      (config) => {
-        config.url = this.proxy + config.url;
-
-        return config;
-      },
-      (error) => {
-        Promise.reject(error);
-      },
+  findGyv = async (query: string): Promise<AddressSearchItem[]> => {
+    return this.errorWrapper(() =>
+      this.AuthApiAxios.get('/addresses/find/gyv', {
+        params: { q: query, top: 10 },
+      }),
     );
-  }
-
-  errorWrapper = async (endpoint: () => Promise<AxiosResponse<any, any>>) => {
-    const res = await endpoint();
-
-    return res.data;
   };
 
-  get = async ({ resource, id }: GetAll) => {
-    return this.errorWrapper(() => this.AuthApiAxios.get(`/${resource}${id ? `/${id}` : ''}`));
-  };
-
-  getGyv = async (gyv: string): Promise<any> => {
-    return this.get({
-      resource: `${RegisterResources.FIND_GYV}?q=${gyv}&top=10`,
-    });
+  findAdr = async (gyvId: number, query: string): Promise<AddressSearchItem[]> => {
+    return this.errorWrapper(() =>
+      this.AuthApiAxios.get('/addresses/find/adr', {
+        params: { gyv: gyvId, q: query, top: 10 },
+      }),
+    );
   };
 }
 
 const api = new Api();
-const api_reg = new ApiReg();
 
-export { api, api_reg };
+export { api };

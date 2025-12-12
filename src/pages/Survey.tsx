@@ -21,8 +21,8 @@ import { Option, Question } from '../types';
 import { ButtonColors, buttonLabels, isEmpty, QuestionType, slugs } from '../utils';
 import { api } from '../utils/api';
 import InfoCardButtonsGroup from '../components/buttons/InfoCardButtonsGroup';
-import AddressSelectField from '../components/fields/AddressSelectField';
 import NumericTextField from '../components/fields/NumericTextField';
+import AddressPicker, { AddressValue } from '../components/fields/AddressPicker';
 
 const Survey = () => {
   const [searchParams] = useSearchParams();
@@ -178,8 +178,13 @@ const Survey = () => {
           />
         );
       case QuestionType.ADDRESS:
-        return <AddressSelectField {...geSelectProps} />;
-
+        return (
+          <AddressPicker
+            {...getCommonProps}
+            value={fieldValue as AddressValue | undefined}
+            onChange={(addr: AddressValue) => onChange(addr)}
+          />
+        );
       default:
         return null;
     }
@@ -210,9 +215,16 @@ const Survey = () => {
   const mappedQuestionsByIds = questions.reduce((acc, curr) => ({ ...acc, [curr.id]: curr }), {});
 
   const handleIsRequired = (question: Question) => {
-    const { condition, required, id } = question;
+    const { condition, required, id, type } = question;
+    const v = values[id];
 
-    if (!isEmpty(values[id])) return false;
+    if (type === QuestionType.ADDRESS) {
+      const addr = v as AddressValue | undefined;
+      const isEmptyAddress = !addr || !addr.gyvId;
+      if (!isEmptyAddress) return false;
+    } else {
+      if (!isEmpty(v)) return false;
+    }
 
     if (handleIsHiddenField(mappedQuestionsByIds, condition)) return false;
 
