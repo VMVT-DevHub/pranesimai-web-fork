@@ -27,11 +27,13 @@ const InfoCardButtonsGroup = ({
   error,
   showError = false,
 }: ToggleButtonProps) => {
-  const { data: session } = useQuery({
+  const { data: session, isLoading } = useQuery({
     queryKey: ['currentSession'],
     queryFn: () => api.getCurrentSession(),
     retry: false,
   });
+
+  if (isLoading || !session) return null;
 
   return (
     // <FieldWrapper error={error} showError={showError} label={label}>
