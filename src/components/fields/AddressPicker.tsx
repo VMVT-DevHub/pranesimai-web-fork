@@ -11,6 +11,8 @@ import { api, AddressSearchItem } from '../../utils/api';
 export interface AddressValue {
   gyvId: number | null;
   gyvName?: string;
+  gatId: number | null;
+  gatName?: string;
   adrId: number | null;
   adrName?: string;
 }
@@ -37,25 +39,34 @@ const AddressPicker = ({
   const current: AddressValue = value ?? {
     gyvId: null,
     gyvName: undefined,
+    gatId: null,
+    gatName: undefined,
     adrId: null,
     adrName: undefined,
   };
 
   const [gyvSearch, setGyvSearch] = useState('');
+  const [gatSearch, setGatSearch] = useState('');
   const [adrSearch, setAdrSearch] = useState('');
 
   const [openGyv, setOpenGyv] = useState(false);
+  const [openGat, setOpenGat] = useState(false);
   const [openAdr, setOpenAdr] = useState(false);
 
   useEffect(() => {
     if (!value) {
       setGyvSearch('');
+      setGatSearch('');
       setAdrSearch('');
       return;
     }
 
     if (value.gyvName) {
       setGyvSearch(value.gyvName);
+    }
+
+    if (value.gatName) {
+      setGatSearch(value.gatName);
     }
 
     if (value.adrName) {
@@ -66,6 +77,9 @@ const AddressPicker = ({
   const formatLabel = (item?: AddressSearchItem) =>
     item ? `${item.pavad}${item.vietove ? `, ${item.vietove}` : ''}` : '';
 
+  const formatAltLabel = (item?: AddressSearchItem) => (item ? `${item.pavad}` : '');
+
+  // ----------------- GYV (miestas/kaimas) -----------------
   const hasMinGyvChars = gyvSearch.trim().length >= 2;
 
   const { data: gyvList = [], isLoading: gyvLoading } = useQuery({
@@ -83,28 +97,61 @@ const AddressPicker = ({
     onChange({
       gyvId: item.id,
       gyvName: label,
+      gatId: null,
+      gatName: undefined,
       adrId: null,
       adrName: undefined,
     });
 
     setGyvSearch(label);
+    setGatSearch('');
     setAdrSearch('');
+
     setOpenGyv(false);
+    setOpenGat(false);
+    setOpenAdr(false);
   };
 
-  const hasMinAdrChars = adrSearch.trim().length >= 2;
+  // ----------------- GAT (gatvė) -----------------
 
-  const { data: adrList = [], isLoading: adrLoading } = useQuery({
-    queryKey: ['addrFindAdr', current.gyvId, adrSearch],
-    enabled: !!current.gyvId && hasMinAdrChars,
-    queryFn: () => api.findAdr(current.gyvId!, adrSearch.trim()),
+  const { data: gatList = [], isLoading: gatLoading } = useQuery({
+    queryKey: ['addrFindGat', current.gyvId, gatSearch],
+    enabled: !!current.gyvId,
+    queryFn: () => api.searchGat(current.gyvId!, gatSearch.trim()),
     retry: false,
   });
 
-  const adrOptions = hasMinAdrChars ? adrList.map(formatLabel) : [];
+  const gatOptions = gatList.map(formatAltLabel);
+
+  const handleGatSelect = (item: AddressSearchItem) => {
+    const label = formatAltLabel(item);
+
+    onChange({
+      ...current,
+      gatId: item.id,
+      gatName: label,
+      adrId: null,
+      adrName: undefined,
+    });
+
+    setGatSearch(label);
+    setAdrSearch('');
+    setOpenGat(false);
+    setOpenAdr(false);
+  };
+
+  // ----------------- ADR (pilnas adresas) -----------------
+  const { data: adrList = [], isLoading: adrLoading } = useQuery({
+    queryKey: ['addrFindAdr', current.gyvId, current.gatId, adrSearch],
+    enabled: !!current.gyvId,
+    queryFn: () => api.findAdr(current.gyvId!, adrSearch.trim(), current.gatId || undefined),
+    retry: false,
+  });
+
+  const adrOptions = adrList.map(formatAltLabel);
 
   const handleAdrSelect = (item: AddressSearchItem) => {
-    const label = formatLabel(item);
+    const label = formatAltLabel(item);
 
     onChange({
       ...current,
@@ -124,6 +171,7 @@ const AddressPicker = ({
       if (!rootRef.current) return;
       if (!rootRef.current.contains(event.target as Node)) {
         setOpenGyv(false);
+        setOpenGat(false);
         setOpenAdr(false);
       }
     };
@@ -136,6 +184,7 @@ const AddressPicker = ({
     <FieldWrapper label={label} bottomLabel={bottomLabel} error={error} showError={showError}>
       <Wrapper ref={rootRef}>
         <Row>
+          {/* Gyvenvietė */}
           <Column>
             <SubLabel>Gyvenvietė</SubLabel>
             <SelectWrapper>
@@ -149,6 +198,18 @@ const AddressPicker = ({
                   onChange={(t) => {
                     setGyvSearch(t);
                     setOpenGyv(true);
+                    if (!t.trim()) {
+                      onChange({
+                        gyvId: null,
+                        gyvName: undefined,
+                        gatId: null,
+                        gatName: undefined,
+                        adrId: null,
+                        adrName: undefined,
+                      });
+                      setGatSearch('');
+                      setAdrSearch('');
+                    }
                   }}
                   placeholder="Įrašykite miesto arba kaimo pavadinimą"
                   error={undefined}
@@ -175,6 +236,55 @@ const AddressPicker = ({
             </SelectWrapper>
           </Column>
 
+          {/* Gatvė */}
+          <Column>
+            <SubLabel>Gatvė (neprivalomas laukas)</SubLabel>
+            <SelectWrapper>
+              <InputClickArea
+                onClick={() => {
+                  if (!disabled && current.gyvId) setOpenGat(true);
+                }}
+              >
+                <TextFieldInput
+                  value={gatSearch}
+                  onChange={(t) => {
+                    setGatSearch(t);
+                    setOpenGat(true);
+
+                    if (!t.trim()) {
+                      onChange({
+                        ...current,
+                        gatId: null,
+                        gatName: undefined,
+                        adrId: null,
+                        adrName: undefined,
+                      });
+                      setAdrSearch('');
+                    }
+                  }}
+                  placeholder="Įrašykite gatvės pavadinimą"
+                  error={undefined}
+                  leftIcon={undefined}
+                  rightIcon={<StyledIcon name={IconName.dropdownArrow} />}
+                  disabled={disabled || !current.gyvId}
+                />
+              </InputClickArea>
+
+              <OptionsContainer
+                loading={gatLoading}
+                values={openGat ? gatOptions : []}
+                getOptionLabel={(label: string) => label}
+                showSelect={openGat && (!!gatOptions.length || !!current.gyvId)}
+                handleClick={(label: string) => {
+                  const item = gatList.find((i) => formatAltLabel(i) === label);
+                  if (item) handleGatSelect(item);
+                }}
+                isAddress
+              />
+            </SelectWrapper>
+          </Column>
+
+          {/* Adresas */}
           <Column>
             <SubLabel>Adresas</SubLabel>
             <SelectWrapper>
@@ -189,7 +299,7 @@ const AddressPicker = ({
                     setAdrSearch(t);
                     setOpenAdr(true);
                   }}
-                  placeholder="Įrašykite gatvės pavadinimą"
+                  placeholder="Įrašykite adresą (namo nr.)"
                   error={undefined}
                   leftIcon={undefined}
                   rightIcon={<StyledIcon name={IconName.dropdownArrow} />}
@@ -199,16 +309,11 @@ const AddressPicker = ({
 
               <OptionsContainer
                 loading={adrLoading}
-                values={
-                  openAdr ? (hasMinAdrChars ? adrOptions : ['Įrašykite bent 2 simbolius']) : []
-                }
+                values={openAdr ? adrOptions : []}
                 getOptionLabel={(label: string) => label}
-                showSelect={
-                  openAdr && (!!adrOptions.length || (!hasMinAdrChars && !!current.gyvId))
-                }
+                showSelect={openAdr && (!!adrOptions.length || !!current.gyvId)}
                 handleClick={(label: string) => {
-                  if (!hasMinAdrChars) return;
-                  const item = adrList.find((i) => formatLabel(i) === label);
+                  const item = adrList.find((i) => formatAltLabel(i) === label);
                   if (item) handleAdrSelect(item);
                 }}
                 isAddress

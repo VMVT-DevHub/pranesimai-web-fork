@@ -224,9 +224,23 @@ class Api {
     );
   };
 
-  findAdr = async (gyvId: number, query: string): Promise<AddressSearchItem[]> => {
+  findAdr = async (gyvId: number, query: string, gatId?: number): Promise<AddressSearchItem[]> => {
+    const params: any = {
+      gyv: gyvId,
+      q: query,
+      top: 10,
+    };
+
+    if (gatId != null) {
+      params.gat = gatId;
+    }
+
+    return this.errorWrapper(() => this.AuthApiAxios.get('/addresses/find/adr', { params }));
+  };
+
+  searchGat = async (gyvId: number, query: string): Promise<AddressSearchItem[]> => {
     return this.errorWrapper(() =>
-      this.AuthApiAxios.get('/addresses/find/adr', {
+      this.AuthApiAxios.get('/addresses/search/gat', {
         params: { gyv: gyvId, q: query, top: 10 },
       }),
     );
