@@ -240,6 +240,7 @@ const Column = styled.div`
 
 const SubLabel = styled.div`
   margin-top: 12px;
+  font-size: 1.4rem;
   color: #667085;
 `;
 
