@@ -1,7 +1,8 @@
 import styled from 'styled-components';
 import FieldWrapper from '../fields/components/FieldWrapper';
 import { Survey } from '../../types';
-import { getIconUrl } from '../../utils';
+import { api, getIconUrl } from '../../utils';
+import { useQuery } from '@tanstack/react-query';
 
 export interface ToggleButtonProps {
   options: any[];
@@ -26,25 +27,38 @@ const InfoCardButtonsGroup = ({
   error,
   showError = false,
 }: ToggleButtonProps) => {
+  const { data: session } = useQuery({
+    queryKey: ['currentSession'],
+    queryFn: () => api.getCurrentSession(),
+    retry: false,
+  });
+
   return (
     // <FieldWrapper error={error} showError={showError} label={label}>
     <InfoCardContainer>
-      {options.map((option, index) => (
-        <StyledButton
-          type="button"
-          disabled={disabled || option?.disabled}
-          key={`group-button${index}`}
-          left={index === 0}
-          right={index === options.length - 1}
-          selected={isSelected(option)}
-          error={!!error}
-          onClick={() => (disabled ? {} : onChange(option))}
-        >
-          <Circle />
-          <Title>{getOptionLabel ? getOptionLabel(option) : option.title}</Title>
-          <Description>{option.description}</Description>
-        </StyledButton>
-      ))}
+      {options.map((option, index) => {
+        let indexOfAuth = -1;
+        if (session.auth == false && option.requiresAuth == true) {
+          indexOfAuth = index;
+        }
+        return (
+          <StyledButton
+            $requiresAuth={indexOfAuth == index}
+            type="button"
+            disabled={disabled || option?.disabled}
+            key={`group-button${index}`}
+            left={index === 0}
+            right={index === options.length - 1}
+            selected={isSelected(option)}
+            error={!!error}
+            onClick={() => (disabled ? {} : onChange(option))}
+          >
+            <Circle />
+            <Title>{getOptionLabel ? getOptionLabel(option) : option.title}</Title>
+            <Description>{option.description}</Description>
+          </StyledButton>
+        );
+      })}
     </InfoCardContainer>
 
     // </FieldWrapper>
@@ -53,7 +67,6 @@ const InfoCardButtonsGroup = ({
 const InfoCardContainer = styled.div`
   display: grid;
   justify-content: center;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: 32px;
   width: 100%;
 `;
@@ -72,7 +85,7 @@ const Circle = styled.div`
 `;
 const Title = styled.div`
   font-weight: 600;
-  font-size: 1.6rem;
+  font-size: 1.8rem;
   text-align: start;
   color: ${({ theme }) => theme.colors.text.primary};
 `;
@@ -91,6 +104,7 @@ const StyledButton = styled.button<{
   selected: boolean;
   disabled?: boolean;
   error?: boolean;
+  $requiresAuth?: boolean;
 }>`
   padding: 28px 16px 16px 28px;
   display: flex;
@@ -101,6 +115,7 @@ const StyledButton = styled.button<{
   gap: 10px;
   border: 1px solid ${({ theme }) => theme.colors.border};
   position: relative;
+  display: ${({ $requiresAuth }) => ($requiresAuth ? 'none' : 'flex')};
   ${({ selected, theme }) =>
     selected &&
     `
