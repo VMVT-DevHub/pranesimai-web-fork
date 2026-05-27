@@ -222,6 +222,8 @@ const Survey = () => {
       const addr = v as AddressValue | undefined;
       const isEmptyAddress = !addr || !addr.gyvId;
       if (!isEmptyAddress) return false;
+    } else if (type === QuestionType.CHECKBOX) {
+      if (v === true) return false;
     } else {
       if (!isEmpty(v)) return false;
     }
