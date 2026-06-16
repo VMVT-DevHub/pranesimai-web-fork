@@ -21,6 +21,7 @@ export interface Question extends CommonFields {
   type: QuestionType;
   title: string;
   description: string;
+  customLogic: string;
   condition: {
     question: number;
     value: string;
