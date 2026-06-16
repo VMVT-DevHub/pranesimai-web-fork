@@ -20,7 +20,7 @@ This repository contains the source code and documentation for the Pranešimai W
 The Pranešimai WEB is designed to provide functionalities of collecting surveys about different food and vetinary services
 
 This is a client application that utilizes
-the [Pranešimai API](https://github.com/vmvt-devhub/pranesimai-api).
+the [Pranešimai API](https://github.com/vmvt-devhub/pranesimai-api-fork).
 
 ## Getting Started
 
@@ -31,7 +31,7 @@ To get started with the Pranešimai WEB, follow the instructions below.
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/vmvt-devhub/pranesimai-web.git
+   git clone https://github.com/vmvt-devhub/pranesimai-web-fork.git
    ```
 
 2. Install the required dependencies:

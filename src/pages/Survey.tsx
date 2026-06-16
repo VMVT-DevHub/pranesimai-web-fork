@@ -83,9 +83,12 @@ const Survey = () => {
     onChange,
     values,
   ) => {
-    const { condition, title, hint, options, required, spField } = currentQuestion;
+    const { condition, title, hint, options, required, spField, customLogic } = currentQuestion;
     const fieldValue = values?.[currentQuestion.id];
-    const maxSelectedValues = (spField && Number(spField.split('')[spField.length - 1])) || 5;
+    const maxSelectedValues =
+      (customLogic && customLogic.search(/select/i) !== -1 && Number(customLogic.split('_')[1])) ||
+      5;
+    //customLogic can be select_1 select_3 select_4 etc
 
     if (handleIsHiddenField(conditionQuestions, condition)) {
       return <></>;
