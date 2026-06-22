@@ -8,6 +8,7 @@ export interface CommonFields {
 export interface Survey extends CommonFields {
   title: string;
   authType: AuthTypes;
+  anonymousAuthAvailable?: boolean;
   description: string;
   icon: string;
   firstPage: number;

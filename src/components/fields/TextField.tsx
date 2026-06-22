@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import FieldWrapper from './components/FieldWrapper';
 import TextFieldInput from './components/TextFieldInput';
 export interface TextFieldProps {
@@ -45,21 +46,30 @@ const TextField = ({
   secondLabel,
   onInputClick,
 }: TextFieldProps) => {
+  const [errorMessage, setErrorMessage] = useState('');
+  const handleBlur = () => {
+    if (placeholder == '+37000000000') {
+      const ltPhoneRegex = /^(?:\+370|0)\d{8}$/;
+      if (value && !ltPhoneRegex.test(value.toString()))
+        setErrorMessage('Netinkamas telefono numerio formatas.');
+      else setErrorMessage('');
+    }
+  };
   return (
     <FieldWrapper
+      handleBlur={handleBlur}
       padding={padding}
       className={className}
       label={label}
       subLabel={subLabel}
       secondLabel={secondLabel}
-      error={error}
+      error={errorMessage}
       showError={showError}
-      bottomLabel={bottomLabel}
     >
       <TextFieldInput
         value={value}
         name={name}
-        error={error}
+        error={errorMessage}
         leftIcon={leftIcon}
         rightIcon={rightIcon}
         onChange={onChange}

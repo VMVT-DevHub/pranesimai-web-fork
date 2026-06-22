@@ -26,6 +26,7 @@ export interface DateFieldProps {
   maxDate?: Date | string;
   minDate?: Date | string;
   placeHolder?: string;
+  spField: string;
 }
 
 const DateField = ({
@@ -39,6 +40,7 @@ const DateField = ({
   className,
   maxDate,
   minDate,
+  spField,
 }: DateFieldProps) => {
   const daterRegex = /^\d{4}-\d{2}-\d{2}$/;
   const isMobile = useWindowSize(device.mobileL);
@@ -46,6 +48,7 @@ const DateField = ({
   const [inputValue, setInputValue] = useState('');
   const [isVisible, setIsVisible] = useState(true);
   const invisibleDivRef = useRef(null);
+  maxDate = spField == 'ivykio_data' ? new Date() : undefined;
 
   useEffect(() => {
     const checkVisibility = (entries) => {

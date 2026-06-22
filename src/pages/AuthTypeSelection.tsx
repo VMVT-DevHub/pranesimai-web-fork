@@ -1,11 +1,13 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
 import Button from '../components/buttons/Button';
 import InfoCard from '../components/cards/InfoCard';
 import Icon from '../components/other/Icons';
 import Default from '../layouts/Default';
-import { buttonLabels, descriptions, IconName, titles } from '../utils';
+import { buttonLabels, descriptions, IconName, titles, AuthTypes } from '../utils';
+import { api } from '../utils/api';
 
 const AuthTypeSelection = () => {
   const [selectedSurveyAuthType, setSelectedSurveyAuthType] = useState<boolean | undefined>(
@@ -14,6 +16,20 @@ const AuthTypeSelection = () => {
   const [searchParams] = useSearchParams();
   const surveyId = searchParams.get('surveyId') || '';
   const [buttonLoading, setButtonLoading] = useState(false);
+  const { data: surveys } = useQuery({
+    queryKey: ['surveys'],
+    queryFn: () => api.getAllSurveys(),
+  });
+  const survey = surveys?.find((item) => item.id === Number(surveyId));
+  const showAnonymousOption =
+    survey?.authType === AuthTypes.OPTIONAL && survey?.anonymousAuthAvailable !== false;
+
+  useEffect(() => {
+    if (survey && !showAnonymousOption) {
+      setSelectedSurveyAuthType(true);
+    }
+  }, [showAnonymousOption, survey]);
+
   const info = [
     {
       title: titles.anonym,
@@ -27,7 +43,7 @@ const AuthTypeSelection = () => {
       icon: <Icon name={IconName.user} />,
       value: true,
     },
-  ];
+  ].filter((item) => showAnonymousOption || item.value);
 
   return (
     <Default title={titles.surveyType} description={descriptions.surveyType}>
@@ -35,7 +51,7 @@ const AuthTypeSelection = () => {
         <input type="hidden" name="survey" value={surveyId} />
         <input type="hidden" name="auth" value={`${selectedSurveyAuthType}`} />
         <Container>
-          <ContentContainer>
+          <ContentContainer $isSingle={info.length === 1}>
             {info?.map((item) => (
               <InfoCard
                 key={item.title}
@@ -61,10 +77,13 @@ const AuthTypeSelection = () => {
   );
 };
 
-const ContentContainer = styled.div`
+const ContentContainer = styled.div<{ $isSingle: boolean }>`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  justify-content: center;
+  grid-template-columns: ${({ $isSingle }) =>
+    $isSingle ? 'minmax(250px, 420px)' : 'repeat(auto-fill, minmax(250px, 1fr))'};
   gap: 32px;
+  width: 100%;
 `;
 
 const Container = styled.div`
@@ -72,6 +91,7 @@ const Container = styled.div`
   grid-template-columns: 1;
   align-items: center;
   gap: 32px;
+  width: 100%;
 `;
 
 const ButtonContainer = styled.div`

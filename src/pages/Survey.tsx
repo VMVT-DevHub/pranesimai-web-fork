@@ -89,8 +89,7 @@ const Survey = () => {
       (customLogic && customLogic.search(/select/i) !== -1 && Number(customLogic.split('_')[1])) ||
       5;
     //customLogic can be select_1 select_3 select_4 etc
-
-    if (handleIsHiddenField(conditionQuestions, condition)) {
+    if (condition && handleIsHiddenField(conditionQuestions, condition)) {
       return <></>;
     }
 
@@ -99,6 +98,7 @@ const Survey = () => {
       value: fieldValue,
       label: `${title} ${!required ? ' (Neprivalomas) ' : ''}`,
       bottomLabel: hint,
+      spField: spField,
     };
     const geSelectProps = {
       ...getCommonProps,
@@ -236,7 +236,19 @@ const Survey = () => {
     if (required) return true;
   };
 
-  const isDisabledSubmit = submitResponseMutation.isPending || questions.some(handleIsRequired);
+  const handleIsPhone = (question: Question) => {
+    const { id, hint } = question;
+    if (hint !== '+37000000000') return false;
+
+    const ltPhoneRegex = /^(?:\+370|0)\d{8}$/;
+    if (!ltPhoneRegex.test(values[id])) return true;
+    else return false;
+  };
+
+  const isDisabledSubmit =
+    submitResponseMutation.isPending ||
+    questions.some(handleIsRequired) ||
+    questions.some(handleIsPhone);
 
   return (
     <Default

@@ -113,18 +113,22 @@ const StyledTextInput = styled.input<{
   ::-webkit-input-placeholder {
     color: ${({ theme, $selectedValue }) =>
       theme.colors.text.input + `${!$selectedValue ? '8F' : ''}`};
+    font-size: 1.4rem;
   }
   ::-moz-placeholder {
     color: ${({ theme, $selectedValue }) =>
       theme.colors.text.input + `${!$selectedValue ? '8F' : ''}`};
+    font-size: 1.4rem;
   }
   ::-ms-placeholder {
     color: ${({ theme, $selectedValue }) =>
       theme.colors.text.input + `${!$selectedValue ? '8F' : ''}`};
+    font-size: 1.4rem;
   }
   ::placeholder {
     color: ${({ theme, $selectedValue }) =>
       theme.colors.text.input + `${!$selectedValue ? '8F' : ''}`};
+    font-size: 1.4rem;
   }
 `;
 

@@ -15,6 +15,7 @@ export interface AddressValue {
   gatName?: string;
   adrId: number | null;
   adrName?: string;
+  fullName?: string;
 }
 
 interface AddressPickerProps {
@@ -36,22 +37,48 @@ const AddressPicker = ({
   value,
   onChange,
 }: AddressPickerProps) => {
-  const current: AddressValue = value ?? {
+  const current: AddressValue | string = value ?? {
     gyvId: null,
     gyvName: undefined,
     gatId: null,
     gatName: undefined,
     adrId: null,
     adrName: undefined,
+    fullName: undefined,
+  };
+
+  const buildFullAddress = (val: AddressValue) => {
+    const parts = [val.adrName ?? val.gatName, val.gyvName].filter(Boolean);
+
+    return parts.join(', ');
   };
 
   const [gyvSearch, setGyvSearch] = useState('');
   const [gatSearch, setGatSearch] = useState('');
   const [adrSearch, setAdrSearch] = useState('');
 
+  const [debouncedGyvSearch, setDebouncedGyvSearch] = useState('');
+  const [debouncedGatSearch, setDebouncedGatSearch] = useState('');
+  const [debouncedAdrSearch, setDebouncedAdrSearch] = useState('');
+
   const [openGyv, setOpenGyv] = useState(false);
   const [openGat, setOpenGat] = useState(false);
   const [openAdr, setOpenAdr] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedGyvSearch(gyvSearch), 300);
+    return () => clearTimeout(timer);
+  }, [gyvSearch]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedGatSearch(gatSearch), 300);
+    return () => clearTimeout(timer);
+  }, [gatSearch]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedAdrSearch(adrSearch), 300);
+    return () => clearTimeout(timer);
+  }, [adrSearch]);
 
   useEffect(() => {
     if (!value) {
@@ -83,9 +110,9 @@ const AddressPicker = ({
   const hasMinGyvChars = gyvSearch.trim().length >= 2;
 
   const { data: gyvList = [], isLoading: gyvLoading } = useQuery({
-    queryKey: ['addrFindGyv', gyvSearch],
-    enabled: hasMinGyvChars,
-    queryFn: () => api.findGyv(gyvSearch.trim()),
+    queryKey: ['addrFindGyv', debouncedGyvSearch], // <-- debounced
+    enabled: debouncedGyvSearch.trim().length >= 2,
+    queryFn: () => api.findGyv(debouncedGyvSearch.trim()),
     retry: false,
   });
 
@@ -94,16 +121,22 @@ const AddressPicker = ({
   const handleGyvSelect = (item: AddressSearchItem) => {
     const label = formatLabel(item);
 
-    onChange({
+    const newValue: AddressValue = {
       gyvId: item.id,
       gyvName: label,
       gatId: null,
       gatName: undefined,
       adrId: null,
       adrName: undefined,
+    };
+
+    onChange({
+      ...newValue,
+      fullName: buildFullAddress(newValue),
     });
 
     setGyvSearch(label);
+
     setGatSearch('');
     setAdrSearch('');
 
@@ -115,9 +148,9 @@ const AddressPicker = ({
   // ----------------- GAT (gatvė) -----------------
 
   const { data: gatList = [], isLoading: gatLoading } = useQuery({
-    queryKey: ['addrFindGat', current.gyvId, gatSearch],
+    queryKey: ['addrFindGat', current.gyvId, debouncedGatSearch], // <-- debounced
     enabled: !!current.gyvId,
-    queryFn: () => api.searchGat(current.gyvId!, gatSearch.trim()),
+    queryFn: () => api.searchGat(current.gyvId!, debouncedGatSearch.trim()),
     retry: false,
   });
 
@@ -126,12 +159,17 @@ const AddressPicker = ({
   const handleGatSelect = (item: AddressSearchItem) => {
     const label = formatAltLabel(item);
 
-    onChange({
+    const newValue: AddressValue = {
       ...current,
       gatId: item.id,
       gatName: label,
       adrId: null,
       adrName: undefined,
+    };
+
+    onChange({
+      ...newValue,
+      fullName: buildFullAddress(newValue),
     });
 
     setGatSearch(label);
@@ -142,9 +180,10 @@ const AddressPicker = ({
 
   // ----------------- ADR (pilnas adresas) -----------------
   const { data: adrList = [], isLoading: adrLoading } = useQuery({
-    queryKey: ['addrFindAdr', current.gyvId, current.gatId, adrSearch],
+    queryKey: ['addrFindAdr', current.gyvId, current.gatId, debouncedAdrSearch], // <-- debounced
     enabled: !!current.gyvId,
-    queryFn: () => api.findAdr(current.gyvId!, adrSearch.trim(), current.gatId || undefined),
+    queryFn: () =>
+      api.findAdr(current.gyvId!, debouncedAdrSearch.trim(), current.gatId || undefined),
     retry: false,
   });
 
@@ -153,10 +192,15 @@ const AddressPicker = ({
   const handleAdrSelect = (item: AddressSearchItem) => {
     const label = formatAltLabel(item);
 
-    onChange({
+    const newValue: AddressValue = {
       ...current,
       adrId: item.id,
       adrName: label,
+    };
+
+    onChange({
+      ...newValue,
+      fullName: buildFullAddress(newValue),
     });
 
     setAdrSearch(label);
@@ -236,9 +280,46 @@ const AddressPicker = ({
             </SelectWrapper>
           </Column>
 
+          {/* Adresas */}
+          <Column>
+            <SubLabel>Adresas</SubLabel>
+            <SelectWrapper>
+              <InputClickArea
+                onClick={() => {
+                  if (!disabled && current.gyvId) setOpenAdr(true);
+                }}
+              >
+                <TextFieldInput
+                  value={adrSearch}
+                  onChange={(t) => {
+                    setAdrSearch(t);
+                    setOpenAdr(true);
+                  }}
+                  placeholder="Įrašykite adresą (namo nr.)"
+                  error={undefined}
+                  leftIcon={undefined}
+                  rightIcon={<StyledIcon name={IconName.dropdownArrow} />}
+                  disabled={disabled || !current.gyvId}
+                />
+              </InputClickArea>
+
+              <OptionsContainer
+                loading={adrLoading}
+                values={openAdr ? adrOptions : []}
+                getOptionLabel={(label: string) => label}
+                showSelect={openAdr && (!!adrOptions.length || !!current.gyvId)}
+                handleClick={(label: string) => {
+                  const item = adrList.find((i) => formatAltLabel(i) === label);
+                  if (item) handleAdrSelect(item);
+                }}
+                isAddress
+              />
+            </SelectWrapper>
+          </Column>
+
           {/* Gatvė */}
           <Column>
-            <SubLabel>Gatvė (neprivalomas laukas)</SubLabel>
+            <SubLabel>Gatvė, jei nėra namo numerio (Neprivalomas)</SubLabel>
             <SelectWrapper>
               <InputClickArea
                 onClick={() => {
@@ -278,43 +359,6 @@ const AddressPicker = ({
                 handleClick={(label: string) => {
                   const item = gatList.find((i) => formatAltLabel(i) === label);
                   if (item) handleGatSelect(item);
-                }}
-                isAddress
-              />
-            </SelectWrapper>
-          </Column>
-
-          {/* Adresas */}
-          <Column>
-            <SubLabel>Adresas</SubLabel>
-            <SelectWrapper>
-              <InputClickArea
-                onClick={() => {
-                  if (!disabled && current.gyvId) setOpenAdr(true);
-                }}
-              >
-                <TextFieldInput
-                  value={adrSearch}
-                  onChange={(t) => {
-                    setAdrSearch(t);
-                    setOpenAdr(true);
-                  }}
-                  placeholder="Įrašykite adresą (namo nr.)"
-                  error={undefined}
-                  leftIcon={undefined}
-                  rightIcon={<StyledIcon name={IconName.dropdownArrow} />}
-                  disabled={disabled || !current.gyvId}
-                />
-              </InputClickArea>
-
-              <OptionsContainer
-                loading={adrLoading}
-                values={openAdr ? adrOptions : []}
-                getOptionLabel={(label: string) => label}
-                showSelect={openAdr && (!!adrOptions.length || !!current.gyvId)}
-                handleClick={(label: string) => {
-                  const item = adrList.find((i) => formatAltLabel(i) === label);
-                  if (item) handleAdrSelect(item);
                 }}
                 isAddress
               />

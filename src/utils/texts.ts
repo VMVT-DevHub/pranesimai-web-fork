@@ -1,5 +1,5 @@
 export const titles = {
-  surveyType: 'Pranešimo tipas',
+  surveyType: 'Pranešėjo tipas',
   authenticated: 'Autentifikuosiu save per  e. valdžios vartus',
   anonym: 'Nesutinku identifikuotis',
   report: 'Kokiu būdu pranešite?',
@@ -7,7 +7,7 @@ export const titles = {
 };
 
 export const descriptions = {
-  surveyType: 'Pasirinkite pranešimo tipą',
+  surveyType: 'Pasirinkite pranešėjo tipą',
   authenticated:
     'Jūsų pranešimas bus nagrinėjamas ir informuosime apie įvykio nagrinėjimo eigą ir priimtus sprendimus elektroniniu paštu.',
   anonym:
