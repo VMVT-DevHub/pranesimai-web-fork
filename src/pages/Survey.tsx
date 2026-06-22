@@ -89,8 +89,7 @@ const Survey = () => {
       (customLogic && customLogic.search(/select/i) !== -1 && Number(customLogic.split('_')[1])) ||
       5;
     //customLogic can be select_1 select_3 select_4 etc
-
-    if (condition && handleIsHiddenField(conditionQuestions[condition.question], condition)) {
+    if (condition && handleIsHiddenField(conditionQuestions, condition)) {
       return <></>;
     }
 
