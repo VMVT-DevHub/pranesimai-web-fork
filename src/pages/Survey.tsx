@@ -20,6 +20,8 @@ import { device } from '../styles';
 import { Option, Question } from '../types';
 import { ButtonColors, buttonLabels, isEmpty, QuestionType, slugs } from '../utils';
 import { api } from '../utils/api';
+import InfoCardButtonsGroup from '../components/buttons/InfoCardButtonsGroup';
+import NumericTextField from '../components/fields/NumericTextField';
 import AddressPicker, { AddressValue } from '../components/fields/AddressPicker';
 
 const Survey = () => {
@@ -49,16 +51,30 @@ const Survey = () => {
     setValues(currentResponse?.values);
   }, [currentResponse?.values]);
 
-  const handleIsHiddenField = (conditionQuestions: Question, condition: Question['condition']) => {
-    if (!conditionQuestions) return false;
+  const handleIsHiddenField = (
+    allQuestions: Record<number, Question>,
+    conditions: Question['condition'],
+  ) => {
+    if (!allQuestions || !conditions) return false;
 
-    const conditionQuestionValue = values?.[condition.question];
+    const conditionsArray = Array.isArray(conditions) ? conditions : [conditions];
 
-    if (conditionQuestions.type === QuestionType.MULTISELECT) {
-      if (!conditionQuestionValue?.includes(condition.value)) return true;
-    } else {
-      if (conditionQuestionValue !== condition.value) return true;
-    }
+    if (conditionsArray.length === 0) return false;
+
+    const allConditionsMet = conditionsArray.every((condition) => {
+      const conditionQuestion = allQuestions[condition.question];
+      if (!conditionQuestion) return false;
+
+      const conditionQuestionValue = values?.[condition.question];
+
+      if (conditionQuestion.type === QuestionType.MULTISELECT) {
+        return conditionQuestionValue?.includes(condition.value);
+      } else {
+        return conditionQuestionValue === condition.value;
+      }
+    });
+
+    return !allConditionsMet;
   };
 
   const renderField = (
@@ -67,9 +83,12 @@ const Survey = () => {
     onChange,
     values,
   ) => {
-    const { condition, title, hint, options, required, spField } = currentQuestion;
+    const { condition, title, hint, options, required, spField, customLogic } = currentQuestion;
     const fieldValue = values?.[currentQuestion.id];
-    const maxSelectedValues = (spField && Number(spField.split('')[spField.length - 1])) || 5;
+    const maxSelectedValues =
+      (customLogic && customLogic.search(/select/i) !== -1 && Number(customLogic.split('_')[1])) ||
+      5;
+    //customLogic can be select_1 select_3 select_4 etc
 
     if (condition && handleIsHiddenField(conditionQuestions[condition.question], condition)) {
       return <></>;
@@ -85,6 +104,7 @@ const Survey = () => {
     const geSelectProps = {
       ...getCommonProps,
       getOptionLabel: (option: Option) => option.title,
+      description: (option: Option) => option.description,
       options,
     };
 
@@ -113,7 +133,17 @@ const Survey = () => {
           />
         );
       case QuestionType.INPUT:
-        return <TextField {...getCommonProps} placeholder={hint} />;
+        return <TextField {...getCommonProps} />;
+      case QuestionType.NUMBER:
+        return <NumericTextField {...getCommonProps} />;
+      case QuestionType.INFOCARD:
+        return (
+          <InfoCardButtonsGroup
+            {...geSelectProps}
+            onChange={(value) => onChange(value.id)}
+            isSelected={(options) => options.id === fieldValue}
+          />
+        );
       case QuestionType.EMAIL:
         return <TextField {...getCommonProps} type="email" />;
       case QuestionType.TEXT:
@@ -168,6 +198,7 @@ const Survey = () => {
     mutationFn: (params: { [key: string]: any }) => api.submitResponse(pageId, { values: params }),
     onSuccess: (data) => {
       const nav = data?.nextResponse ? { search: `pageId=${data.nextResponse}` } : slugs.end;
+
       return navigate(nav);
     },
   });
@@ -195,12 +226,13 @@ const Survey = () => {
       const addr = v as AddressValue | undefined;
       const isEmptyAddress = !addr || !addr.gyvId;
       if (!isEmptyAddress) return false;
+    } else if (type === QuestionType.CHECKBOX) {
+      if (v === true) return false;
     } else {
       if (!isEmpty(v)) return false;
     }
 
-    if (condition && handleIsHiddenField(mappedQuestionsByIds[condition.question], condition))
-      return false;
+    if (handleIsHiddenField(mappedQuestionsByIds, condition)) return false;
 
     if (required) return true;
   };

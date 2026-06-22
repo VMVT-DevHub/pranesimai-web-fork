@@ -13,6 +13,11 @@ export default () => {
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/api/, ''),
         },
+        '/register': {
+          target: env.VITE_REGISTER_PROXY_URL,
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/register/, ''),
+        },
       },
     },
     assetsInclude: ['**/*.png'],

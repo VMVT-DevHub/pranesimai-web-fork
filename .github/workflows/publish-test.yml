@@ -28,7 +28,7 @@ jobs:
       - name: Archive artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: test-files
+          name: test-fork-files
           path: dist
 
   deploy:
