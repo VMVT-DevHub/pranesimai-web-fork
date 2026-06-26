@@ -1,3 +1,4 @@
+import { format } from 'date-fns';
 import { toast } from 'react-toastify';
 
 export const getIconUrl = (icon: string) => {
@@ -18,6 +19,9 @@ export const handleErrorToast = (message) => {
     closeOnClick: true,
   });
 };
+
+export const formatDate = (date?: Date | string) =>
+  date ? format(new Date(date), 'yyyy-MM-dd') : '-';
 
 export const isEmpty = (value: any) => {
   if (value === undefined || value === null) {

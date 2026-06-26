@@ -1,5 +1,6 @@
 import { CgClose } from 'react-icons/cg';
 import { FaTrash } from 'react-icons/fa';
+import { CiLogin, CiLogout, CiMail, CiEdit } from 'react-icons/ci';
 import { FiArrowLeft, FiClock, FiDownload } from 'react-icons/fi';
 import { IoMdCalendar } from 'react-icons/io';
 import { MdKeyboardArrowDown } from 'react-icons/md';
@@ -16,6 +17,14 @@ const Icon = ({ name, className }: IconProps) => {
       return <IoMdCalendar className={className} />;
     case IconName.time:
       return <FiClock className={className} />;
+    case 'logout':
+      return <CiLogout className={className} />;
+    case 'login':
+      return <CiLogin className={className} />;
+    case 'mail':
+      return <CiMail className={className} />;
+    case 'edit':
+      return <CiEdit className={className} />;
     case IconName.back:
       return <FiArrowLeft className={className} />;
     case IconName.dropdownArrow:
@@ -45,6 +54,43 @@ const Icon = ({ name, className }: IconProps) => {
           />
           <path
             d="M45 47.25C45 42.4761 43.1036 37.8977 39.7279 34.5221C36.3523 31.1464 31.7739 29.25 27 29.25C22.2261 29.25 17.6477 31.1464 14.2721 34.5221C10.8964 37.8977 9 42.4761 9 47.25"
+            stroke="#2671D9"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      );
+    case IconName.userLogo:
+      return (
+        <svg
+          width="55"
+          height="54"
+          className={className}
+          viewBox="-3 -5 63 63"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <circle
+            cx="28"
+            cy="28"
+            r="26"
+            stroke="#2671D9"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <circle
+            cx="28"
+            cy="19"
+            r="7"
+            stroke="#2671D9"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <path
+            d="M12.7 48.3C12.7 39.8 19.6 33 28 33C36.4 33 43.3 39.8 43.3 48.3"
             stroke="#2671D9"
             strokeWidth="2"
             strokeLinecap="round"

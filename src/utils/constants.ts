@@ -32,6 +32,7 @@ export enum PageType {
 
 export enum IconName {
   user = 'user',
+  userLogo = 'userLogo',
   anonym = 'anonym',
   back = 'back',
   dropdownArrow = 'dropdownArrow',
@@ -40,6 +41,7 @@ export enum IconName {
   remove = 'remove',
   download = 'download',
   time = 'time',
+  arrowDown = 'arrowDown',
 }
 
 export enum AuthTypes {

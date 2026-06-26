@@ -6,6 +6,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { ThemeProvider } from 'styled-components';
 import App from './App';
 import { GlobalStyle, theme } from './styles/index';
+import { UserProvider } from './utils/hooks';
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 
@@ -16,7 +17,9 @@ root.render(
     <BrowserRouter>
       <ThemeProvider theme={theme}>
         <GlobalStyle />
-        <App />
+        <UserProvider>
+          <App />
+        </UserProvider>
         <ToastContainer />
       </ThemeProvider>
     </BrowserRouter>

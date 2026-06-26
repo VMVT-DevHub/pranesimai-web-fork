@@ -1,6 +1,7 @@
 import styled from 'styled-components';
 import BackButton from '../components/buttons/BackButton';
 import { device } from '../styles';
+import { Header } from '../components/Header';
 
 const Default = ({
   children,
@@ -18,17 +19,20 @@ const Default = ({
   topComponent?: JSX.Element;
 }) => {
   return (
-    <MainContainer>
-      <Container maxWidth={maxWidth}>
-        <BackButton backUrl={backUrl} />
-        <InnerContainer>
-          {topComponent}
-          <Title>{title}</Title>
-          <SubTitle>{description}</SubTitle>
-          {children}
-        </InnerContainer>
-      </Container>
-    </MainContainer>
+    <>
+      <Header />
+      <MainContainer>
+        <Container maxWidth={maxWidth}>
+          <BackButton backUrl={backUrl} />
+          <InnerContainer>
+            {topComponent}
+            <Title>{title}</Title>
+            <SubTitle>{description}</SubTitle>
+            {children}
+          </InnerContainer>
+        </Container>
+      </MainContainer>
+    </>
   );
 };
 export default Default;
@@ -40,12 +44,14 @@ const SubTitle = styled.div`
 `;
 const MainContainer = styled.div`
   display: flex;
+  flex-direction: row;
   justify-content: center;
   align-items: center;
   width: 100%;
   height: 100%;
   overflow-y: auto;
   padding: 12px;
+  margin: 12px;
   position: fixed;
 `;
 
