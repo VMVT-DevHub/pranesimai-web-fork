@@ -1,6 +1,7 @@
 import Axios, { AxiosInstance, AxiosResponse } from 'axios';
 import { Response, Survey } from '../types';
 import { isEmpty } from './functions';
+import { User } from './hooks';
 
 interface GetAll {
   resource: string;
@@ -72,7 +73,9 @@ class Api {
   private readonly proxy: string = '/api';
 
   constructor() {
-    this.AuthApiAxios = Axios.create();
+    this.AuthApiAxios = Axios.create({
+      withCredentials: true,
+    });
 
     this.AuthApiAxios.interceptors.request.use(
       (config) => {
@@ -148,6 +151,38 @@ class Api {
       resource: `${Resources.RESPONSES}/${id}/respond`,
       params,
     });
+  };
+
+  getUser = async (): Promise<User | null> => {
+    return this.getOne({
+      resource: 'auth/current' as Resources,
+    });
+  };
+
+  login = async (): Promise<any> => {
+    return this.post({
+      resource: 'auth/start',
+    });
+  };
+
+  logout = async (): Promise<any> => {
+    return this.post({
+      resource: 'auth/logout',
+    });
+  };
+
+  getAllReports = async (): Promise<any | null> => {
+    return this.getOne({
+      resource: 'reports/my' as Resources,
+    });
+  };
+
+  getReport = async (id: string): Promise<any> => {
+    return this.errorWrapper(() =>
+      this.AuthApiAxios.get('reports/my', {
+        params: { id: id },
+      }),
+    );
   };
 
   getAllSurveys = async (): Promise<Survey[]> => {
