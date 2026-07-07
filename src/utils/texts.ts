@@ -10,8 +10,7 @@ export const descriptions = {
   surveyType: 'Pasirinkite pranešėjo tipą',
   authenticated:
     'Jūsų pranešimas bus nagrinėjamas ir informuosime apie įvykio nagrinėjimo eigą ir priimtus sprendimus elektroniniu paštu.',
-  anonym:
-    'Jūsų pranešimas gali būti nagrinėjamas, tačiau Jūs nebūsite informuotas apie įvykio nagrinėjimo eigą ir/ar priimtus sprendimus.',
+  anonym: 'Pildysite pranešimą kaip kitas žmogus arba anonimiškai',
   chooseSubmitType: 'Pasirinkite kaip pateiksite pranešimą',
   end: 'Jūsų informacija sėkmingai pateikta',
 };

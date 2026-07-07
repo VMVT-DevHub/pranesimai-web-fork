@@ -177,12 +177,8 @@ class Api {
     });
   };
 
-  getReport = async (id: string): Promise<any> => {
-    return this.errorWrapper(() =>
-      this.AuthApiAxios.get('reports/my', {
-        params: { id: id },
-      }),
-    );
+  getDetailedReport = async (id: string): Promise<any> => {
+    return this.errorWrapper(() => this.AuthApiAxios.get(`/reports/my/${id}`));
   };
 
   getAllSurveys = async (): Promise<Survey[]> => {

@@ -3,6 +3,7 @@ import styled from 'styled-components';
 enum TagColors {
   BLUE = 'blue',
   GREEN = 'green',
+  DARKGREEN = 'dark green',
   GREY = 'grey',
   RED = 'red',
   DARKBLUE = 'dark blue',
@@ -18,6 +19,7 @@ interface StatusTagProps {
 export const statusBackgroundColors = {
   [TagColors.BLUE]: '#EFF8FF',
   [TagColors.GREEN]: '#ECFDF3',
+  [TagColors.DARKGREEN]: '#cbe2d2',
   [TagColors.GREY]: '#F9FAFB ',
   [TagColors.RED]: '#fbe3e0',
   [TagColors.DARKBLUE]: '#c9dff8',
@@ -27,6 +29,7 @@ export const statusBackgroundColors = {
 export const statusFontColors = {
   [TagColors.BLUE]: '#175CD3',
   [TagColors.GREEN]: '#027A48',
+  [TagColors.DARKGREEN]: '#10561d',
   [TagColors.GREY]: '#6C737F',
   [TagColors.RED]: '#60150b',
   [TagColors.DARKBLUE]: '#0a2656',

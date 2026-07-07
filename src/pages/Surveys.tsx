@@ -9,6 +9,7 @@ import Default from '../layouts/Default';
 import { Survey } from '../types';
 import { AuthTypes, buttonLabels, descriptions, slugs, titles } from '../utils';
 import { api } from '../utils/api';
+import { useUser } from '../utils/hooks';
 
 const Surveys = () => {
   const [selectedSurvey, setSelectedSurvey] = useState<Survey | undefined>(undefined);
@@ -17,10 +18,12 @@ const Surveys = () => {
     queryKey: ['surveys'],
     queryFn: () => api.getAllSurveys(),
   });
+  const { user } = useUser();
 
   const navigate = useNavigate();
 
-  const isOptionalSurvey = selectedSurvey?.authType === AuthTypes.OPTIONAL;
+  // const isOptionalSurvey = selectedSurvey?.authType !== AuthTypes.OPTIONAL;
+  const isOptionalSurvey = !user;
 
   return (
     <Default maxWidth={1200} title={titles.surveyType} description={descriptions.surveyType}>
@@ -46,7 +49,7 @@ const Surveys = () => {
                 setButtonLoading(true);
 
                 if (!isOptionalSurvey) return;
-
+                // //
                 navigate({ pathname: slugs.auth, search: `surveyId=${selectedSurvey?.id}` });
               }}
               type={isOptionalSurvey ? 'button' : 'submit'}

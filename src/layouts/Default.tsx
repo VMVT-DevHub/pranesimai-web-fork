@@ -49,7 +49,7 @@ const MainContainer = styled.div`
   align-items: center;
   width: 100%;
   height: 100%;
-  overflow-y: auto;
+  overflow: auto;
   padding: 12px;
   margin: 12px;
   position: fixed;
@@ -59,7 +59,7 @@ const Container = styled.div<{ maxWidth: number }>`
   display: flex;
   flex-direction: column;
   width: 100%;
-  width: ${({ maxWidth }) => `${maxWidth}px`};
+  max-width: ${({ maxWidth }) => `${maxWidth}px`};
   margin: auto;
 `;
 
