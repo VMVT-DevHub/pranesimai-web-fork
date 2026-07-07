@@ -100,7 +100,7 @@ const TH = styled.th`
   border-bottom: 1px solid #cdd5df;
   line-height: 17px;
   white-space: normal;
-  min-width: 250px;
+  min-width: 150px;
   font-weight: 600;
 `;
 

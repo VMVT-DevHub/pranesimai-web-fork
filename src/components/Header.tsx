@@ -76,24 +76,24 @@ export const Header = () => {
           </DropDownContainer>
         )}
         {!user && showSelect && (
-          <form action="/api/auth/start" method="POST">
-            <StyledButton type="submit">
-              <DropDownContainer>
-                <BottomRow
-                  onClick={() => {
-                    navigate('/');
-                  }}
-                >
-                  <StyledLogoutIcon name={'edit'} />
-                  <Name>Pildyti pranešimą</Name>
-                </BottomRow>
+          <DropDownContainer>
+            <BottomRow
+              onClick={() => {
+                navigate('/');
+              }}
+            >
+              <StyledLogoutIcon name={'edit'} />
+              <Name>Pildyti pranešimą</Name>
+            </BottomRow>
+            <form action="/api/auth/start" method="POST">
+              <StyledButton>
                 <BottomRow>
                   <StyledLogoutIcon name={'login'} />
                   <Name>Prisijungti</Name>
                 </BottomRow>
-              </DropDownContainer>
-            </StyledButton>
-          </form>
+              </StyledButton>
+            </form>
+          </DropDownContainer>
         )}
       </Container>
     </HeaderContainer>

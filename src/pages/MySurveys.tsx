@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import Default from '../layouts/Default';
 import { api, descriptions, formatDate } from '../utils';
 import { useUser } from '../utils/hooks';
@@ -9,15 +9,15 @@ import { device } from '../styles';
 import StatusTag from '../components/fields/StatusTag';
 
 const labels = {
-  id: 'Prašymo Nr.',
+  id: 'Prašymo nr.',
+  submittedAt: 'Pateikimo data',
   name: 'Tipas',
-  submittedAt: 'Pateikta',
-  auth: 'Anoniminis',
   status: 'Statusas',
 };
 
 const status = {
   SUBMITTED: 'Pateiktas',
+  DRAFT: 'Juodraštis',
   REJECTED: 'Atmestas',
   APPROVED: 'Patvirtintas',
   FINISHED: 'Pabaigtas',
@@ -27,9 +27,21 @@ const status = {
   NONACTIVE: 'Neaktualus',
 };
 
+const statusColors = {
+  SUBMITTED: 'yellow',
+  DRAFT: 'grey',
+  REJECTED: 'red',
+  APPROVED: 'green',
+  FINISHED: 'dark green',
+  PHYSICALCHECK: 'dark blue',
+  ADMINCHECK: 'dark blue',
+  WATCHCHECK: 'dark blue',
+  NONACTIVE: 'grey',
+};
 export const MySurveys = () => {
   const navigate = useNavigate();
   const { user, isLoading, isLoggedIn } = useUser();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const useAllReports = () => {
     return useQuery({
@@ -39,7 +51,12 @@ export const MySurveys = () => {
     });
   };
 
+  const handleDetailedReport = (id: string) => {
+    navigate(`/mano/${id}`);
+  };
+
   const { data } = useAllReports();
+
   if (!user) navigate('/');
 
   const mappedData =
@@ -50,8 +67,7 @@ export const MySurveys = () => {
         id: item.id,
         name: item?.survey?.title,
         submittedAt: formatDate(item?.createdAt),
-        status: <StatusTag label={status[item?.status]} />,
-        auth: item?.auth ? 'Ne' : 'Taip',
+        status: <StatusTag label={status[item?.status]} color={statusColors[item?.status]} />,
       };
     });
 
@@ -60,7 +76,14 @@ export const MySurveys = () => {
       title="Mano Pranešimai"
       description="Čia galite rasti savo pateiktus pranešimus bei jų vykdymo statusą"
     >
-      <StyledTable onClick={() => {}} tableData={mappedData} labels={labels}></StyledTable>
+      <StyledTable
+        loading={isLoading}
+        onClick={(item: any) => {
+          handleDetailedReport(item.id);
+        }}
+        tableData={mappedData}
+        labels={labels}
+      ></StyledTable>
     </Default>
   );
 };
@@ -70,6 +93,7 @@ const StyledTable = styled(Table)`
   width: 800px;
   th {
     min-width: auto !important;
+    background-color: rgb(245, 246, 254);
   }
   td:last-child {
     width: auto !important;

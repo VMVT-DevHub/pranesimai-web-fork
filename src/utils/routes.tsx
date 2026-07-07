@@ -2,6 +2,7 @@ import AuthTypeSelection from '../pages/AuthTypeSelection';
 import End from '../pages/End';
 import { MySurveys } from '../pages/MySurveys';
 import Survey from '../pages/Survey';
+import { SurveyDetail } from '../pages/SurveyDetail';
 import Surveys from '../pages/Surveys';
 
 export const slugs = {
@@ -9,6 +10,7 @@ export const slugs = {
   auth: '/autentifikacija',
   survey: '/pranesimas',
   mySurveys: '/mano',
+  mySurveysDetail: '/mano/:id',
   end: '/pabaiga',
 };
 
@@ -32,5 +34,9 @@ export const routes = [
   {
     slug: slugs.mySurveys,
     component: <MySurveys />,
+  },
+  {
+    slug: slugs.mySurveysDetail,
+    component: <SurveyDetail />,
   },
 ];
