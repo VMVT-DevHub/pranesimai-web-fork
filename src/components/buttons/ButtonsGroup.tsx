@@ -59,7 +59,6 @@ const StyledButton = styled.button<{
   error?: boolean;
 }>`
   flex-grow: 1;
-  height: 40px;
   padding: 12px;
   border-color: ${({ error, selected, theme }) =>
     !error ? (selected ? theme.colors.primary : '#cdd5df') : theme.colors.error};
