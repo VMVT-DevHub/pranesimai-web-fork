@@ -31,6 +31,7 @@ const Surveys = () => {
         {isLoading && <FullscreenLoader />}
         <form action={`/api/sessions/start`} method="POST">
           <input type="hidden" name="survey" value={selectedSurvey?.id} />
+          <input type="hidden" name="auth" value={String(!!user)} />
           <ContentContainer>
             {surveys?.map((survey) => (
               <InfoCard
@@ -47,9 +48,8 @@ const Surveys = () => {
               disabled={!selectedSurvey}
               onClick={() => {
                 setButtonLoading(true);
-
                 if (!isOptionalSurvey) return;
-                // //
+
                 navigate({ pathname: slugs.auth, search: `surveyId=${selectedSurvey?.id}` });
               }}
               type={isOptionalSurvey ? 'button' : 'submit'}

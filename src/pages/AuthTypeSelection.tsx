@@ -31,12 +31,12 @@ const AuthTypeSelection = () => {
   }, [showAnonymousOption, survey]);
 
   const info = [
-    // {
-    //   title: titles.anonym,
-    //   description: descriptions.anonym,
-    //   icon: <Icon name={IconName.anonym} />,
-    //   value: false,
-    // },
+    {
+      title: titles.anonym,
+      description: descriptions.anonym,
+      icon: <Icon name={IconName.anonym} />,
+      value: false,
+    },
     {
       title: titles.authenticated,
       description: descriptions.authenticated,
